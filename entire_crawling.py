@@ -2,8 +2,7 @@ from urls import *
 import requests
 from bs4 import BeautifulSoup
 
-# 중복 제거 되기 전 리스트
-lists = []
+data = {}
 
 def crawling_bypage(url, page):
     url = url + '?page=' + str(page)
@@ -25,17 +24,23 @@ def crawling_bypage(url, page):
     # 고정된 공지사항을 제외한 공지
     trs_mn = trs[fixedNum:total_trs]
     for tr in trs_mn:
+        notices = []
         title_list = {}
         basic_url = 'https://www.sungshin.ac.kr'
-        # 공지사항 제목
         a = tr.find('a')
+        # 공지사항 제목
         title = a.find('strong').text.strip()
         # 공지사항 url
-        href = basic_url + tr.find('a')['href']
-        title_list["title"] = title
-        title_list["url"] = href
+        url = basic_url + tr.find('a')['href']
+        # 공지사항 날짜
+        day = tr.findAll('td')[2].text.strip()
 
-        lists.append(title_list)
+        notices.append(url)
+        notices.append(day)
+        data[title] = notices
+
+    return data
+
 
 def crawling(url, page):
     for i in range(1, page + 1):
@@ -136,7 +141,7 @@ crawling(math_hire, 2)
 crawling(statistics_hire, 2)
 
 # it학부
-crawling(it_hire, 3)
+crawling(it_hire, 2)
 
 # 수리통계데이터사이언스학부
 crawling(dataScience_outdoor, 1)
@@ -154,17 +159,7 @@ crawling(music, 5)
 # 무용예술학과
 crawling(danceArt, 3)
 
-
-def title_url():
-    # 중복 제거
-    xs = list({list['title']: list for list in lists}.values())
-    for x in xs:
-        title = x['title']
-        url = x['url']
-        print(title)
-        print(url)
-
-title_url()
+print(data)
 
 
 
